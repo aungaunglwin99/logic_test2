@@ -1,25 +1,15 @@
 package com.example.logictest2
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Button
 import android.widget.ImageView
-import android.widget.TextView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import com.example.logictest2.databinding.ActivityMainBinding
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var imPlayer: ImageView
-    lateinit var imComputer: ImageView
-    lateinit var tvScore: TextView
-    lateinit var tvResult: TextView
-
-    lateinit var btRock: Button
-    lateinit var btPaper: Button
-    lateinit var btScissor: Button
-    lateinit var fBtRestart: FloatingActionButton
+    private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
 
     var playerScore = 0
     var computerScore = 0
@@ -28,38 +18,27 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(binding.root)
 
-        imPlayer = findViewById(R.id.ivPlayer)
-        imComputer = findViewById(R.id.ivComputer)
-        tvScore = findViewById(R.id.tvScore)
-        tvResult = findViewById(R.id.tvResult)
+        binding.btRock.setOnClickListener { play("rock") }
+        binding.btPaper.setOnClickListener { play("paper") }
+        binding.btScissor.setOnClickListener { play("scissor") }
 
-        btRock = findViewById(R.id.btRock)
-        btPaper = findViewById(R.id.btPaper)
-        btScissor = findViewById(R.id.btScissor)
-        fBtRestart = findViewById(R.id.fBtRestart)
+        binding.fbRestart.setOnClickListener { restartGame() }
 
-        btRock.setOnClickListener { play("rock") }
-        btPaper.setOnClickListener { play("paper") }
-        btScissor.setOnClickListener { play("scissor") }
-
-        fBtRestart.setOnClickListener { restartGame() }
-
-        // initial UI
         restartGame()
     }
 
-    fun play(playerMove: String) {
+    fun play(playerMove: String) = with(binding) {
         // show images area
-        imPlayer.visibility = ImageView.VISIBLE
-        imComputer.visibility = ImageView.VISIBLE
+        ivPlayer.visibility = ImageView.VISIBLE
+        ivComputer.visibility = ImageView.VISIBLE
 
         val moves = listOf("rock", "paper", "scissor")
         val compMove = moves[Random.nextInt(3)]
 
-        setMoveImage(imPlayer, playerMove)
-        setMoveImage(imComputer, compMove)
+        setMoveImage(ivPlayer, playerMove)
+        setMoveImage(ivComputer, compMove)
 
         round++
 
@@ -70,10 +49,12 @@ class MainActivity : AppCompatActivity() {
                 playerScore++
                 tvResult.text = "You Win Round $round!"
             }
+
             "lose" -> {
                 computerScore++
                 tvResult.text = "You Lose Round $round!"
             }
+
             else -> tvResult.text = "Round $round is a Draw!"
         }
 
@@ -81,8 +62,9 @@ class MainActivity : AppCompatActivity() {
         checkGameOverIfNeeded()
     }
 
-    private fun updateScoreText() {
-        tvScore.text = "Your Score $playerScore/$WIN_SCORE      Computer Score $computerScore/$WIN_SCORE"
+    private fun updateScoreText() = with(binding) {
+        tvPlayerScore.text = "Your Score $playerScore/$WIN_SCORE"
+        tvComputerScore.text = "Computer Score $computerScore/$WIN_SCORE"
     }
 
     private fun checkGameOverIfNeeded() {
@@ -90,16 +72,18 @@ class MainActivity : AppCompatActivity() {
             playerScore >= WIN_SCORE -> {
                 onGameOver(playerWon = true)
             }
+
             computerScore >= WIN_SCORE -> {
                 onGameOver(playerWon = false)
             }
+
             else -> {
                 // game continues
             }
         }
     }
 
-    private fun onGameOver(playerWon: Boolean) {
+    private fun onGameOver(playerWon: Boolean) = with(binding) {
         // disable move buttons
         setMoveButtonsEnabled(false)
 
@@ -112,7 +96,7 @@ class MainActivity : AppCompatActivity() {
         tvResult.text = "Game Over"
 
         // show AlertDialog to announce winner and show option to restart
-        AlertDialog.Builder(this)
+        AlertDialog.Builder(this@MainActivity)
             .setTitle(if (playerWon) "You Win!" else "You Lose")
             .setMessage(message)
             .setCancelable(false)
@@ -126,22 +110,22 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    fun restartGame() {
+    fun restartGame() = with(binding) {
         playerScore = 0
         computerScore = 0
         round = 0
 
-        tvScore.text = "Your Score 0/$WIN_SCORE      Computer Score 0/$WIN_SCORE"
+        updateScoreText()
         tvResult.text = "Click a button to start!"
 
-        imPlayer.visibility = ImageView.INVISIBLE
-        imComputer.visibility = ImageView.INVISIBLE
+        ivPlayer.visibility = ImageView.INVISIBLE
+        ivComputer.visibility = ImageView.INVISIBLE
 
         // re-enable move buttons so user can play again
         setMoveButtonsEnabled(true)
     }
 
-    private fun setMoveButtonsEnabled(enabled: Boolean) {
+    private fun setMoveButtonsEnabled(enabled: Boolean) = with(binding) {
         btRock.isEnabled = enabled
         btPaper.isEnabled = enabled
         btScissor.isEnabled = enabled
